@@ -9,10 +9,10 @@ var severityLabels = {
     "FF4D4D": "major outage"
 };
 var statusLabel = {
-  "operational": "Opérationnel"
+  "operational": "Opérationnel",
   "investigating": "En cours d'investigation",
   "degraded performance": "Fonctionnement dégradé",
-  "major outage": "Interruption majeure",
+  "major outage": "Interruption majeure"
 }
 
 function render() {
