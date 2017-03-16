@@ -114,10 +114,9 @@ img {
 
 .panel{
     color: white;
-    padding: 20px;
+    padding: 10px;
     font-size: 1.2em;
     font-weight: 200;
-    border-radius: .5rem;
     margin-bottom: 20px;
 }
 
