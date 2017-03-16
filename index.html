@@ -50,7 +50,7 @@
     <ul class="systems">
       {{#systems}}
       <li>
-        {{ name }} <span class="status {{ status }}">{{ status }}</span>
+        {{ name }} <span class="status {{ status }}">{{ statusLabel }}</span>
       </li>
       {{/systems}}
     </ul>
@@ -60,9 +60,7 @@
     {{#incidents}}
     <div class="incident">
       <span class="date">{{ created_at }}</span>
-
-
-      <span class="label {{ severity }} float-right">{{ severity }}</span>
+      <span class="label {{ severity }} float-right">{{ severityLabel }}</span>
 
       {{#affectedSystems}}
 

@@ -8,6 +8,12 @@ var severityLabels = {
     "FFA500": "degraded performance",
     "FF4D4D": "major outage"
 };
+var statusLabel = {
+  "operational": "Opérationnel"
+  "investigating": "En cours d'investigation",
+  "degraded performance": "Fonctionnement dégradé",
+  "major outage": "Interruption majeure",
+}
 
 function render() {
 
@@ -33,7 +39,7 @@ function render() {
 
     labels.forEach(function (label) {
         if (label.color == systemLabelColor) {
-            systems.push({"name": label.name, "status": "operational"});
+            systems.push({"name": label.name, "status": "operational", "statusLabel": statusLabel['operational']});
         }
     });
 
@@ -45,12 +51,14 @@ function render() {
     var incidentCount = 0;
     issues.every(function (issue) {
         issue.severity = "";
+        issue.severityLabel = "";
         issue.affectedSystems = [];
         issue.updates = [];
         issue.created_at = moment.tz(issue.created_at, moment.tz.guess()).format('LLLL');
         issue.labels.forEach(function (label) {
             if (severityLabels[label.color] != undefined) {
                 issue.severity = severityLabels[label.color];
+                issue.severityLabel = issue.severity;
             } else if (label.color == systemLabelColor) {
                 issue.affectedSystems.push(label.name);
             }
@@ -67,6 +75,7 @@ function render() {
                     systems.forEach(function(system){
                        if(system.name == affectedSystem){
                            system.status = issue.severity;
+                           system.statusLabel = statusLabel[issue.severity];
                        }
                     });
                 });
@@ -96,7 +105,7 @@ function render() {
                }
            });
            if(!hasPanel){
-               panels.push({"status": system.status, "systems": [system.name]})
+               panels.push({"status": system.status, "statusLabel": system.statusLabel, "systems": [system.name]})
            }
        }
     });
