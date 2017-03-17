@@ -58,28 +58,29 @@ function render() {
         issue.labels.forEach(function (label) {
             if (severityLabels[label.color] != undefined) {
                 issue.severity = severityLabels[label.color];
-                issue.severityLabel = issue.severity;
+                issue.severityLabel = statusLabel[issue.severity];
             } else if (label.color == systemLabelColor) {
                 issue.affectedSystems.push(label.name);
             }
         });
 
         // make sure that the issue has
-        if(issue.affectedSystems.length > 0 && // a system label
-            issue.severity != undefined && // a severity label
-            issue.user.login.indexOf(config.collaborators) != -1 // is created by a collaborator
-        ){
+        if (
+          issue.affectedSystems.length > 0 && // a system label
+          issue.severity != undefined && // a severity label
+          config.collaborators.indexOf(issue.user.login) != -1 // is created by a collaborator
+        ) {
 
             if (issue.state == "open") {
                 issue.affectedSystems.forEach(function (affectedSystem) {
-                    systems.forEach(function(system){
-                       if(system.name == affectedSystem){
+                    systems.forEach(function(system) {
+                       if (system.name == affectedSystem) {
                            system.status = issue.severity;
                            system.statusLabel = statusLabel[issue.severity];
                        }
                     });
                 });
-            }else{
+            } else {
                 issue.severity = "resolved";
             }
 
@@ -87,25 +88,27 @@ function render() {
         }
 
         // limit displayed incidents to 10
-        if(incidentCount++ == 10){
+        if (incidentCount++ == 10) {
             return false;
         }
+
         return true;
     });
 
     // populate the panels
     var panels = [];
-    systems.forEach(function(system){
-       if(system.status != "operational"){
+    systems.forEach(function(system) {
+       if (system.status != "operational") {
            var hasPanel = false;
-           panels.forEach(function(panel){
-               if(panel.status == system.status){
+           panels.forEach(function(panel) {
+               if (panel.status == system.status) {
                    hasPanel = true;
                    panel.systems.push(system.name);
                }
            });
-           if(!hasPanel){
-               panels.push({"status": system.status, "statusLabel": system.statusLabel, "systems": [system.name]})
+
+           if (!hasPanel) {
+               panels.push({"status": system.status, "statusLabel": system.statusLabel, "systems": [system.name]});
            }
        }
     });
@@ -120,9 +123,9 @@ function render() {
 }
 
 function request(endpoint, callback) {
-
     callback = callback || false;
     var cached = Lockr.get(endpoint);
+
     $.ajax({
         url: endpoint,
         beforeSend: function (request) {
@@ -130,21 +133,20 @@ function request(endpoint, callback) {
                 request.setRequestHeader("If-None-Match", cached.etag);
             }
         },
-
         success: function (data, textStatus, request) {
-            console.log(request.getResponseHeader('X-RateLimit-Remaining'));
-            if (request.status == 304) {
+            console.log('API Rate', request.getResponseHeader('X-RateLimit-Remaining'));
 
-            } else {
-                Lockr.set(endpoint, {"data": data, "etag": request.getResponseHeader('ETag')});
-                if (callback) {
-                    callback();
-                }
+            if (request.status == 304) {
+                return false;
             }
+
+            Lockr.set(endpoint, {"data": data, "etag": request.getResponseHeader('ETag')});
+            callback && callback();
         },
         error: function (request, textStatus, errorThrown) {
-            console.log(request.getResponseHeader('X-RateLimit-Remaining'));
+            console.log('API Rate', request.getResponseHeader('X-RateLimit-Remaining'));
         }
     });
+
     return (cached) ? cached.data : undefined;
 }
